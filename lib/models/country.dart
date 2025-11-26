@@ -14,6 +14,9 @@ class Country {
   final int population; 
   final String region;
   final List<String> languages; // List of strings for languages
+  
+  // BON-06: New field to store the country's currency code (e.g., "USD", "EUR")
+  final String currencyCode;
 
   Country({
     required this.name,
@@ -23,6 +26,8 @@ class Country {
     required this.population,
     required this.region,
     required this.languages,
+    // BON-06: Include currency code in the constructor
+    required this.currencyCode,
     this.isFavorite = false, // Default to false
   });
 
@@ -53,6 +58,22 @@ class Country {
         }
     }
     
+    // --- BON-06: Currency Code Parsing ---
+    String currencyCode = 'N/A';
+    final dynamic currencyData = json['currencies'];
+    if (currencyData is List && currencyData.isNotEmpty) {
+      final firstCurrency = currencyData.first;
+      if (firstCurrency is Map && firstCurrency.containsKey('code')) {
+        // Case 1: The API returns [{ 'code': 'USD', 'name': 'Dollar', ... }]
+        currencyCode = firstCurrency['code'] ?? 'N/A';
+      } else if (firstCurrency is String) {
+        // Case 2: The API returns ['USD', 'EUR']
+        currencyCode = firstCurrency;
+      }
+    }
+    // Note: If your API uses a different field name for the currency code (e.g., 'currency'), 
+    // you will need to adjust the logic above. We're guessing 'currencies' based on common APIs.
+    
     // --- Final Object Creation ---
     return Country(
       name: json['name'] ?? 'Unknown Country',
@@ -66,6 +87,10 @@ class Country {
       population: json['population'] is int ? json['population'] : 0,
       region: json['region'] ?? 'Unknown Region',
       languages: languageNames.isNotEmpty ? languageNames : ['Not available'],
+      
+      // BON-06: Add the parsed currency code
+      currencyCode: currencyCode, 
+      
       isFavorite: false, // Provider logic will override this on load
     );
   }

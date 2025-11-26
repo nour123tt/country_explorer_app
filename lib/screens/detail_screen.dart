@@ -1,10 +1,11 @@
-// lib/screens/detail_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // <-- New import for number formatting
-import 'package:provider/provider.dart'; // <-- New import for Provider
+import 'package:intl/intl.dart'; 
+import 'package:provider/provider.dart'; 
 import '../models/country.dart';
-import '../providers/theme_provider.dart'; // <-- Import the ThemeProvider
+import '../providers/theme_provider.dart'; 
+
+// BON-06: We no longer need the CountryService import since we removed the fetching logic.
+// import '../services/country_service.dart';
 
 // NV-04: The detail screen uses a StatefulWidget as required.
 class DetailScreen extends StatefulWidget {
@@ -20,7 +21,16 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-  
+  // BON-06: REMOVED: No need for Future<double> or initState logic
+  // late Future<double> _exchangeRateFuture;
+
+  // BON-06: REMOVED: The entire initState block that fetched the currency rate
+  @override
+  void initState() {
+    super.initState();
+    // Keeping initState clean, as the currency logic is now simple display.
+  }
+
   // Helper to build a clean detail row for consistency
   Widget _buildDetailRow(String title, String value) {
     return Padding(
@@ -38,14 +48,29 @@ class _DetailScreenState extends State<DetailScreen> {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              // Note: The color here (Colors.blueGrey) should be contextually
-              // adjusted in a real app or removed to inherit the theme's text color,
-              // but we keep it to match the original requirement.
               style: const TextStyle(fontSize: 18, color: Colors.blueGrey),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // BON-06: SIMPLIFIED widget to only display the Currency Code
+  Widget _buildCurrencyCard() {
+    final currencyCode = widget.country.currencyCode;
+
+    // Only display the currency code if it's available
+    if (currencyCode == 'N/A') {
+      return const Text(
+        'Currency details not available.',
+        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+      );
+    }
+
+    return _buildDetailRow(
+      'Currency Code', 
+      currencyCode,
     );
   }
 
@@ -108,6 +133,16 @@ class _DetailScreenState extends State<DetailScreen> {
             // NV-02: Population Detail (Formatted)
             _buildDetailRow('Population', formattedPopulation),
 
+            const Divider(height: 30, thickness: 1),
+
+            // BON-06: Display the simplified Currency Card
+            const Text(
+              'Currency Details', // Changed title to be less about "Exchange"
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+            const SizedBox(height: 15),
+            _buildCurrencyCard(),
+            
             const Divider(height: 30, thickness: 1),
 
             // NV-02: Language Details
