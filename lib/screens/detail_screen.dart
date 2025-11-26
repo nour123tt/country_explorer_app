@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // <-- New import for number formatting
+import 'package:provider/provider.dart'; // <-- New import for Provider
 import '../models/country.dart';
+import '../providers/theme_provider.dart'; // <-- Import the ThemeProvider
 
 // NV-04: The detail screen uses a StatefulWidget as required.
 class DetailScreen extends StatefulWidget {
@@ -36,6 +38,9 @@ class _DetailScreenState extends State<DetailScreen> {
             child: Text(
               value,
               textAlign: TextAlign.right,
+              // Note: The color here (Colors.blueGrey) should be contextually
+              // adjusted in a real app or removed to inherit the theme's text color,
+              // but we keep it to match the original requirement.
               style: const TextStyle(fontSize: 18, color: Colors.blueGrey),
             ),
           ),
@@ -46,13 +51,16 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Access the ThemeProvider
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     // Access the country object from the widget
     final country = widget.country;
-    
+
     // Format population number with commas for readability
     final populationFormatter = NumberFormat('#,###', 'en_US');
     final formattedPopulation = populationFormatter.format(country.population);
-    
+
     // Format languages list into a single string
     final languagesString = country.languages.join(', ');
 
@@ -62,6 +70,17 @@ class _DetailScreenState extends State<DetailScreen> {
         // NV-03: Allows easy return to main screen (via back button).
         title: Text(country.name),
         centerTitle: true,
+        // SM-05: Add the dark mode icon to the actions
+        actions: [
+          IconButton(
+            // Use the getter from ThemeProvider to show the appropriate icon
+            icon: Icon(themeProvider.themeIcon),
+            onPressed: () {
+              // Call the cycleTheme method
+              themeProvider.cycleTheme();
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0), // Increased padding
@@ -77,18 +96,18 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
             const SizedBox(height: 30),
-            
-            // --- Core Details (Replaced old placeholder) ---
-            
-            // Capital (Kept for visual consistency, but now in the DetailRow style)
+
+            // --- Core Details ---
+
+            // Capital
             _buildDetailRow('Capital', country.capital),
-            
+
             // NV-02: Region Detail
             _buildDetailRow('Region', country.region),
-            
+
             // NV-02: Population Detail (Formatted)
             _buildDetailRow('Population', formattedPopulation),
-            
+
             const Divider(height: 30, thickness: 1),
 
             // NV-02: Language Details
@@ -99,9 +118,9 @@ class _DetailScreenState extends State<DetailScreen> {
             const SizedBox(height: 8),
             Text(
               languagesString,
-              style: const TextStyle(fontSize: 18, color: Colors.black87),
+              style: const TextStyle(fontSize: 18, color: Color.fromARGB(221, 132, 206, 245)),
             ),
-            
+
             const Divider(height: 30, thickness: 1),
 
             // BON-02: Favorite Status (Simple display of the state)

@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import provider
 import '../providers/country_provider.dart'; // Import our provider
-import 'country_card.dart'; 
+import '../providers/theme_provider.dart'; // <-- Import now points to the simpler file
+import 'country_card.dart';
 
 // The main screen that will show the list of countries.
 class MainScreen extends StatelessWidget {
@@ -10,11 +11,25 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Access the ThemeProvider to get the icon and cycle function
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         // MS-01: Title
         title: const Text('Country Explorer'),
         centerTitle: true,
+        // SM-05: Add the dark mode icon to the actions
+        actions: [
+          IconButton(
+            // Use the getter from ThemeProvider to show the appropriate icon
+            icon: Icon(themeProvider.themeIcon),
+            onPressed: () {
+              // Call the cycleTheme method
+              themeProvider.cycleTheme();
+            },
+          ),
+        ],
       ),
       // SM-03: Use Consumer to listen to changes in CountryProvider
       body: Consumer<CountryProvider>(
@@ -64,8 +79,8 @@ class MainScreen extends StatelessWidget {
               // MS-02, MS-03: Grid view showing flag, name, capital from provider data
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, 
-                  childAspectRatio: 0.75, 
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
