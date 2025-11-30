@@ -14,6 +14,10 @@ class CountryProvider with ChangeNotifier {
   String? _errorMessage; 
   String _searchQuery = ''; // BON-01: State variable for the search query
 
+  // --- NEW: FAVORITES STATE ---
+  final List<Country> _favoriteCountries = [];
+  // ---------------------------
+
   // --- Constructor: Initial Data Fetch ---
   CountryProvider() {
     // SM-01: Call fetch immediately when the provider is instantiated
@@ -25,6 +29,10 @@ class CountryProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isSearching => _searchQuery.isNotEmpty; // BON-01: Check if filtering
+
+  // --- NEW: FAVORITES GETTER ---
+  List<Country> get favoriteCountries => _favoriteCountries;
+  // -----------------------------
 
   // --- Computed Getter for UI Display ---
   List<Country> get displayedCountries {
@@ -44,6 +52,33 @@ class CountryProvider with ChangeNotifier {
       return nameMatches || capitalMatches;
     }).toList();
   }
+
+  // --- NEW: FAVORITES METHODS ---
+
+  // Method to check if a country is currently in the favorites list
+  bool isFavorite(Country country) {
+    // Assumes the Country model has a unique 'name' field
+    return _favoriteCountries.any((favCountry) => favCountry.name == country.name);
+  }
+
+  // Method to add or remove a country from the favorites list
+  void toggleFavorite(Country country) {
+    final isExisting = isFavorite(country);
+
+    if (isExisting) {
+      // Remove it from favorites
+      _favoriteCountries.removeWhere((favCountry) => favCountry.name == country.name);
+    } else {
+      // Add it to favorites
+      _favoriteCountries.add(country);
+    }
+
+    // Notify listeners so heart icon and favorites screen update
+    notifyListeners();
+  }
+
+  // ------------------------------
+
 
   // --- State Mutators (Public Methods) ---
 

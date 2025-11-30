@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../providers/country_provider.dart';
 import '../providers/theme_provider.dart';
 import 'country_card.dart';
+// NEW IMPORT: Placeholder for the screen we will create in the next step
+import 'favorites_screen.dart'; // <--- ADD THIS IMPORT
 
 // The main screen that will show the list of countries.
 class MainScreen extends StatelessWidget {
@@ -22,6 +24,18 @@ class MainScreen extends StatelessWidget {
         centerTitle: true,
         // SM-05: Add the dark mode icon to the actions
         actions: [
+          // NEW ICON: Favorites navigation button
+          IconButton(
+            icon: const Icon(Icons.favorite), // Icon to navigate to favorites screen
+            onPressed: () {
+              // Navigate to the FavoritesScreen
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+              );
+            },
+          ),
+          // END NEW ICON
+
           IconButton(
             // Use the getter from ThemeProvider to show the appropriate icon
             icon: Icon(themeProvider.themeIcon),

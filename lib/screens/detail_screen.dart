@@ -1,8 +1,13 @@
+// lib/screens/detail_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
 import 'package:provider/provider.dart'; 
 import '../models/country.dart';
 import '../providers/theme_provider.dart'; 
+// <<< NEW IMPORTS >>>
+import '../providers/country_provider.dart'; // Import CountryProvider
+// <<< END NEW IMPORTS >>>
 
 // BON-06: We no longer need the CountryService import since we removed the fetching logic.
 // import '../services/country_service.dart';
@@ -79,6 +84,10 @@ class _DetailScreenState extends State<DetailScreen> {
     // Access the ThemeProvider
     final themeProvider = Provider.of<ThemeProvider>(context);
 
+    // Access the CountryProvider for state changes (watch)
+    final countryProvider = context.watch<CountryProvider>();
+    final isFavorite = countryProvider.isFavorite(widget.country); // Check current favorite status
+
     // Access the country object from the widget
     final country = widget.country;
 
@@ -95,8 +104,31 @@ class _DetailScreenState extends State<DetailScreen> {
         // NV-03: Allows easy return to main screen (via back button).
         title: Text(country.name),
         centerTitle: true,
-        // SM-05: Add the dark mode icon to the actions
         actions: [
+          // <<< NEW: FAVORITES TOGGLE ICON >>>
+          IconButton(
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.red : null, // Red heart if favorited
+            ),
+            onPressed: () {
+              // Toggle the favorite status using the provider
+              countryProvider.toggleFavorite(country);
+
+              // Optional: Show a small confirmation message (Snackbar)
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(isFavorite 
+                      ? '${country.name} removed from favorites.' 
+                      : '${country.name} added to favorites!'),
+                  duration: const Duration(milliseconds: 800),
+                ),
+              );
+            },
+          ),
+          // <<< END NEW ICON >>>
+          
+          // SM-05: Add the dark mode icon to the actions (Existing logic)
           IconButton(
             // Use the getter from ThemeProvider to show the appropriate icon
             icon: Icon(themeProvider.themeIcon),
@@ -158,21 +190,23 @@ class _DetailScreenState extends State<DetailScreen> {
 
             const Divider(height: 30, thickness: 1),
 
-            // BON-02: Favorite Status (Simple display of the state)
-            Row(
+            // BON-02: Favorite Status (Removed static check, now UI reacts to provider)
+            // You can remove this section entirely, as the icon in the AppBar serves this purpose.
+            /* Row(
               children: [
                 Icon(
-                  country.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: country.isFavorite ? Colors.red : Colors.grey,
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : Colors.grey,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  country.isFavorite ? 'This is a favorite country!' : 'Not currently a favorite.',
+                  isFavorite ? 'This is a favorite country!' : 'Not currently a favorite.',
                   style: const TextStyle(fontSize: 16),
                 ),
               ],
             ),
+            */
           ],
         ),
       ),
